@@ -26,9 +26,7 @@ The V3 version will have a custom PC board design to support either two or three
 
 # Software
 
-The V2 software can be found [here](https://github.com/SteveGeyer/Doris/blob/master/sketches/v2/balance/balance.ino) in the [sketches](https://github.com/SteveGeyer/Doris/tree/master/sketches) directory.
-
-The V3 software will be uploaded after it has been fully debugged working on the V3 PC board.
+The software driving Doris can be found in the [sketches](https://github.com/SteveGeyer/Doris/tree/master/sketches) directory.
 
 # License
 

@@ -9,4 +9,6 @@ This directory holds Arduino code.
 
 [v3/nointerrupts](https://github.com/SteveGeyer/Doris/tree/master/sketches/v3/nointerrupts) is the same code as the V2 version modified to use an Arduino Uno and the custom PC board's I/O pin layout. I have noticed a little instablity in the V3 balance. I will be working to resolve this.
 
+[v3/oneinterrupt](https://github.com/SteveGeyer/Doris/tree/master/sketches/v3/interrupt) uses a single interrupt to handle multiple motors stepping function. It is works great with no instability in balance. In future steps my plan is to use this version for the ballbot.
+
 [MPU6050_calibration](https://github.com/SteveGeyer/Doris/tree/master/sketches/MPU6050_calibration) is the sketch used to dervive the calibration parameters for the MPU6050. These parameters and currently wired into the code. This sketch was written by Luis Ródenas <luisrodenaslorda@gmail.com>.
