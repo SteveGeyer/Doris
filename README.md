@@ -32,7 +32,9 @@ The V3 software will be uploaded after it has been fully debugged working on the
 
 # License
 
+Unless otherwise noted in the source file, this design is copyright and licensed as:
+
 Copyright (c) 2016, Steve Geyer
 All rights reserved.
 
-This complete work is licensed as [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
+[Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)
