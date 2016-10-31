@@ -76,12 +76,10 @@ void setup() {
     Wire.begin();
     TWBR = 24;                  // 400kHz I2C clock (200kHz if CPU is 8MHz).
 
-    mpu.setClockSource(MPU6050_CLOCK_PLL_XGYRO);
-    mpu.setFullScaleGyroRange(gyroRange);
-    mpu.setFullScaleAccelRange(accelRange);
-    mpu.setDLPFMode(MPU6050_DLPF_BW_10);
-    mpu.setRate((1000/updatesPerSec)-1);
-    mpu.setSleepEnabled(false);
+    // I seem to have to initialize the MPU twice to get stable results on
+    // boot. I am not sure why.
+    initializeMPU();
+    initializeMPU();
 
     const float lsbSensitity = 32768.0/250.0;
     r2rs = ((1 << gyroRange) / lsbSensitity) * deg2rad;
@@ -131,6 +129,15 @@ void setup() {
 //    while (!Serial); // wait for Leonardo enumeration, others continue immediately
 //    Serial.println("Started");
     nextSampleTime = micros();
+}
+
+void initializeMPU() {
+    mpu.setClockSource(MPU6050_CLOCK_PLL_XGYRO);
+    mpu.setFullScaleGyroRange(gyroRange);
+    mpu.setFullScaleAccelRange(accelRange);
+    mpu.setDLPFMode(MPU6050_DLPF_BW_10);
+    mpu.setRate((1000/updatesPerSec)-1);
+    mpu.setSleepEnabled(false);
 }
 
 void loop() {
