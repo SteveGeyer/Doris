@@ -88,18 +88,13 @@ static void setMotorSpeedM2(int16_t tspeed);
 void setup() {
     Serial.begin(115200);
 
-    pinMode(buzzer, OUTPUT);
-    tone(buzzer, 262, 100);
-
     Wire.begin();
     TWBR = 24;                  // 400kHz I2C clock (200kHz if CPU is 8MHz).
 
-    mpu.setClockSource(MPU6050_CLOCK_PLL_XGYRO);
-    mpu.setFullScaleGyroRange(gyroRange);
-    mpu.setFullScaleAccelRange(accelRange);
-    mpu.setDLPFMode(MPU6050_DLPF_BW_10);
-    mpu.setRate((1000/updatesPerSec)-1);
-    mpu.setSleepEnabled(false);
+    // I seem to have to initialize the MPU twice to get stable results on
+    // boot. I am not sure why.
+    initializeMPU();
+    initializeMPU();
 
     const float lsbSensitity = 32768.0/250.0;
     r2rs = ((1 << gyroRange) / lsbSensitity) * deg2rad;
@@ -124,15 +119,19 @@ void setup() {
 
     // Setup stepper motor values and pins.
     m1Speed = 0;
+    m1Running = 0;
     m1Counter = 0;
     m1ResetValue = 0;
     m2Speed = 0;
+    m2Running = 0;
     m2Counter = 0;
     m2ResetValue = 0;
     pinMode(leftDir, OUTPUT);   // Motor 1 step porte,6
     pinMode(leftStep, OUTPUT);  // Motor 1 direction portb,4
     pinMode(rightDir, OUTPUT);  // Motor 2 step portd,6
     pinMode(rightStep, OUTPUT); // Motor 2 direction portc,6
+    setMotorSpeedM1(0);
+    setMotorSpeedM2(0);
 
     // Timer1
     TCCR1A = 0;
@@ -162,9 +161,18 @@ void setup() {
 //    Kap = 0.0028; Kai = 0.000028; Kad = 0.028;
 //    balanceOffset = -2.3;
 
-//    while (!Serial); // wait for Leonardo enumeration, others continue immediately
-//    Serial.println("Started");
+    pinMode(buzzer, OUTPUT);
+    tone(buzzer, 200, 50);
     nextSampleTime = micros();
+}
+
+void initializeMPU() {
+    mpu.setClockSource(MPU6050_CLOCK_PLL_XGYRO);
+    mpu.setFullScaleGyroRange(gyroRange);
+    mpu.setFullScaleAccelRange(accelRange);
+    mpu.setDLPFMode(MPU6050_DLPF_BW_10);
+    mpu.setRate((1000/updatesPerSec)-1);
+    mpu.setSleepEnabled(false);
 }
 
 void loop() {
