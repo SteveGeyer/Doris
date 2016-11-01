@@ -2,11 +2,11 @@
 
 Doris represents a series of balancing robots I have been working on over the last several years. This repository is where I am placing her design files. Over time I plan to have complete instructions on how to replicate my results.
 
-Doris started her life as a ballbot. As I struggled to get her to balance I decided that starting with a ballbot was too audacious and maybe I should fall back to a two-wheel segway-style robot. Given her modular design it was easy to modified her for two wheels. After a lot of experimentation and learning I have successfully gotten Doris to balance solidly. Afterwards, I gave [this](https://github.com/SteveGeyer/Doris/blob/master/docs/BalancingRobotTalk.pdf) talk on what I have learned. Here is that robot balancing:
+Doris started her life as a ballbot. As I struggled to get her to balance I decided that starting with a ballbot was too audacious and maybe I should fall back to a two-wheel segway-style robot. Given her modular design it was easy to modified her for two wheels. After a lot of experimentation and learning I have successfully gotten Doris to balance solidly. Afterwards, I gave [this](https://github.com/SteveGeyer/Doris/blob/master/docs/BalancingRobotTalk.pdf) talk on what I have learned.
 
-![V2 Robot](https://github.com/SteveGeyer/Doris/blob/master/docs/TwoWheelV2.png "V2 Robot")
+![V2&V3 Robot](https://github.com/SteveGeyer/Doris/blob/master/docs/TwoGenerations.jpg "V2&V3 Robot")
 
-There have been several generations of Doris. V1 is history. V2 is my currently working version. It is a two wheel design based on stepper motors, an Arduino Leonardo, a MPU6050 IMU and A4988 stepper drivers. V3 is currently in development. It extends the current V2 design using an Arduino Uno along with a custom PC board and it supports both two wheel and three wheel ballbot designs. This repository holds both the V2 and V3 designs.
+There have been several generations of Doris. V1 is now history. The left hand robot above is the currently working V2 design. It is a two wheel design based on stepper motors, an Arduino Leonardo, a MPU6050 IMU and A4988 stepper drivers. On the right is the V3 prototype in active development. It extends the V2 design by using an Arduino Uno along with a custom PC board for the motor drivers and IMU. It also supports both two wheel and three wheel ballbot designs. The picture shows the ballbot version. This repository holds both the V2 and V3 designs.
 
 # 3D Models
 
