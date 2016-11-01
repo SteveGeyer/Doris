@@ -538,19 +538,24 @@ module twoWheelMotorMount() {
 // ----------------------------------------------------------------------
 // Three motor mount for ballbot base.
 // ----------------------------------------------------------------------
+threeWheelBottomConeDiameter = 150;
+threeWheelBottomHoleDiameter = 105;
+threeWheelBottomHeight = 45;
+
+module cone(bottomDiameter, height) {
+    cylinder(d1 = bottomDiameter,
+        d2 = bottomDiameter-2*height,
+        h = height, $fn=200);
+}
+
 module threeMotorMount() {
     extensionHeight = 17;
     slide = 3;
     wireHoleDiameter = 12;
     wireHoleHeight = 100;
-    module cone(bottomDiameter, height) {
-        cylinder(d1 = bottomDiameter,
-            d2 = bottomDiameter-2*height,
-            h = height, $fn=200);
-    }
     difference() {
         union() {
-            cone(150, 45);
+            cone(threeWheelBottomConeDiameter, threeWheelBottomHeight);
             translate([0, 0, threeMotorMountHeight]) {
                 threeMountsAdd(threeMotorMountHeight);
             }
@@ -595,6 +600,67 @@ module threeMotorMount() {
         }
     }
 }
+
+threeMotorStandVerticalHeight = 35;
+threeMotorStandConeHeight = 17.5;
+threeMotorStandBrim = 10;
+
+module threeMotorStand() {
+    holeDiameter = 12;
+    holeLength = threeWheelBottomHoleDiameter+2*iota;
+    standThickness = 2;
+    difference() {
+        union() {
+            translate([0, 0, threeMotorStandVerticalHeight]) {
+                cone(threeWheelBottomHoleDiameter, threeMotorStandConeHeight);
+            }
+            cylinder(d = threeWheelBottomHoleDiameter,
+                h = threeMotorStandVerticalHeight, $fn=200);
+
+            cylinder(d = threeWheelBottomHoleDiameter,
+                h = threeMotorStandVerticalHeight, $fn=200);
+            cylinder(d = threeWheelBottomHoleDiameter+2*threeMotorStandBrim,
+                h = plateThickness, $fn=200);
+        }
+        union() {
+            translate([0, 0, threeMotorStandVerticalHeight]) {
+                cone(threeWheelBottomHoleDiameter-2*standThickness,
+                    threeMotorStandConeHeight+iota);
+            }
+            translate([0, 0, plateThickness+iota]) {
+                cylinder(d = threeWheelBottomHoleDiameter-2*standThickness,
+                    h = threeMotorStandVerticalHeight-plateThickness+iota, $fn=200);
+            }
+            translate([0, 0, -iota]) {
+                cylinder(d = threeWheelBottomHoleDiameter-2*threeMotorStandBrim,
+                    h = plateThickness+3*iota, $fn=200);
+            }
+
+            for (a = [0, 20, 40, 60, 80, 100, 120, 140, 160]) {
+                rotate([0, 0, a]) {
+                    translate([0, 0, threeMotorStandVerticalHeight+threeMotorStandConeHeight/2]) {
+                        rotate([90, 0, 0]) {
+                            translate([0, 0, -holeLength/2]) {
+                                cylinder(d = holeDiameter, h = holeLength, $fn=50);
+                            }
+                        }
+                    }
+                    translate([0, 0, threeMotorStandVerticalHeight/2+plateThickness/2]) {
+                        rotate([90, 0, 0]) {
+                            translate([0, 0, -holeLength/2]) {
+                                scale([1, 2, 1]) {
+                                    cylinder(d = holeDiameter, h = holeLength, $fn=50);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+}
+
 
 // ----------------------------------------------------------------------
 // Show all the parts in an exploded parts manner.
