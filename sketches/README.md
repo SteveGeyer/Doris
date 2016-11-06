@@ -11,4 +11,6 @@ This directory holds Arduino code.
 
 [v3/oneinterrupt](https://github.com/SteveGeyer/Doris/tree/master/sketches/v3/interrupt) uses a single interrupt to handle multiple motors stepping function. It is works great with no instability in balance. In future steps my plan is to use this version for the ballbot.
 
+[v3/ballbot](https://github.com/SteveGeyer/Doris/tree/master/sketches/v3/ballbot) uses a single interrupt to handle multiple motors stepping function. Unfortunately, I discovered that the stepping motors I am using cannot drive the omniwheels with enough torque when the omniwheel are being forced to slip sideways. I attempted this with two different omniwheels and both failed. I believe my next step is to use geared DC motors, but that will require redesign. Even thought this code was not able to be made to work I am checking it in as a starting place for some future ballbot. Be warned that it is in some intermediate debugging state.
+
 [MPU6050_calibration](https://github.com/SteveGeyer/Doris/tree/master/sketches/MPU6050_calibration) is the sketch used to dervive the calibration parameters for the MPU6050. These parameters and currently wired into the code. This sketch was written by Luis Ródenas <luisrodenaslorda@gmail.com>.

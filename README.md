@@ -6,7 +6,9 @@ Doris started her life as a ballbot. As I struggled to get her to balance I deci
 
 ![V2&V3 Robot](https://github.com/SteveGeyer/Doris/blob/master/docs/TwoGenerations.jpg "V2&V3 Robot")
 
-There have been several generations of Doris. V1 is now history. The left hand robot above is the currently working V2 design. It is a two wheel design based on stepper motors, an Arduino Leonardo, a MPU6050 IMU and A4988 stepper drivers. On the right is the V3 prototype in active development. It extends the V2 design by using an Arduino Uno along with a custom PC board for the motor drivers and IMU. It also supports both two wheel and three wheel ballbot designs. The picture shows the ballbot version. This repository holds both the V2 and V3 designs.
+There have been several generations of Doris. V1 is now history. The left hand robot above is the currently working V2 design. It is a two wheel design based on stepper motors, an Arduino Leonardo, a MPU6050 IMU and A4988 stepper drivers. On the right is the V3 prototype in active development. It extends the V2 design by using an Arduino Uno along with a custom PC board for the motor drivers and IMU. It also supports both two wheel and three wheel ballbot designs. The picture shows the ballbot version. However, on further testing I discovered that the stepping motors did not have enough torque to push the omniwheels when they needed to slide. It looks like geared DC motors woudld be a better choice in future designs. I am leaving the V3 ballbot designs in this repository in the hopes that it will be the basis for a later design.
+
+This repository holds both the V2 and V3 designs.
 
 # 3D Models
 
@@ -26,7 +28,7 @@ The V3 version will have a custom PC board design to support either two or three
 
 # Software
 
-The software driving Doris can be found in the [sketches](https://github.com/SteveGeyer/Doris/tree/master/sketches) directory.
+The software driving Doris can be found in the [sketches](https://github.com/SteveGeyer/Doris/tree/master/sketches) directory. It has versions for both the V2 and V3 designs.
 
 # License
 
