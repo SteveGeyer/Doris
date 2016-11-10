@@ -38,7 +38,7 @@ const uint8_t accelRange    = MPU6050_ACCEL_FS_2;
 const float   switchToAccel = 0.5; // Secs before trusting accel.
 const float   Kf            = switchToAccel/(switchToAccel+1.0/updatesPerSec);
 
-const int      maxRotations = 8;                 // Maximum rotations/sec.
+const int      maxRotations = 4;                 // Maximum rotations/sec.
 const int      stepsInRotation = 200;            // Number of steps per rotation.
 const int      use16steps = 16;                  // Multiplier for 16 microsteps.
 const int      maxMotorSpeed = maxRotations*360; // Maximum motor speed in degrees/sec.
@@ -78,6 +78,17 @@ static float Kad;               // Speed to angle derivative.
 static float Kbp;               // Balance proportional.
 static float Kbd;               // Balance derivative.
 static float balanceOffset;     // This is the balace angle for robot.
+
+static unsigned long now;       // Last call to micros();
+
+const unsigned long rcTimeOut = 51000;
+const float rcLowPassConst = 0.985;
+static int lastForwardBackwardValue;
+static int lastLeftRightValue;
+static unsigned long lastForwardBackwardTime;
+static unsigned long lastLeftRightTime;
+static int lowPassForwardBackward;
+static int lowPassLeftRight;
 
 static void delay_1us();
 static bool nextSample();
@@ -151,19 +162,24 @@ void setup() {
 //    Kap = 0.028; Kai = 0.000028; Kad = 0.55;
 //    balanceOffset = -2.6;
 
-    // Parameters for short stack with long battery.
-    Kbp = 0.9; Kbd = 0.5;
-    Kap = 0.03; Kai = 0.000028; Kad = 0.4;
-    balanceOffset = 0;
+//    // Parameters for short stack with long battery.
+//    Kbp = 0.9; Kbd = 0.5;
+//    Kap = 0.03; Kai = 0.000028; Kad = 0.4;
+//    balanceOffset = 0;
 
     // Parameters for tall stack.
-//    Kbp = 3.0; Kbd = 1.0;
+    Kbp = 3.0; Kbd = 1.0;
 //    Kap = 0.0028; Kai = 0.000028; Kad = 0.028;
-//    balanceOffset = -2.3;
+    Kap = 0.02; Kai = 0.00001; Kad = 0.01;
+    balanceOffset = 0;
 
     pinMode(buzzer, OUTPUT);
     tone(buzzer, 200, 50);
     nextSampleTime = micros();
+    lastForwardBackwardTime = nextSampleTime;
+    lastLeftRightTime = nextSampleTime;
+    lastForwardBackwardValue = LOW;
+    lastLeftRightValue = LOW;
 }
 
 void initializeMPU() {
@@ -175,10 +191,22 @@ void initializeMPU() {
     mpu.setSleepEnabled(false);
 }
 
+
+int count = 0;
+
+
 void loop() {
+    rcUpdate();
     if (nextSample()) {
-        int direction = 0;      // Deal with this later.
-        float desiredSpeed = 0.0/360;
+
+        int direction = map(lowPassLeftRight, 1300, 1700, 90, -90);
+        float desiredSpeed = map(lowPassForwardBackward, 1000, 2000, -360, 360);
+
+        if ((count++%20) == 0) {
+            Serial.print(direction);
+            Serial.print(" ");
+            Serial.println(desiredSpeed);
+        }
 
         // Get cfAngle and rotation from IMU.
         float cfAngle;
@@ -189,22 +217,27 @@ void loop() {
                         stepsToRotationsSec(m2Speed))/2;
 
         // More positive tends forward, negative tends backwards.
-        float errorAngle = anglePID(desiredSpeed, speed) - cfAngle + balanceOffset;
-//        errorAngle = -cfAngle + balanceOffset;
+        float errorAngle = anglePID(desiredSpeed, speed) -
+            cfAngle + balanceOffset;
+        //        errorAngle = -cfAngle + balanceOffset;
+
+        rcUpdate();
 
         // Basic PD controller with errorAngle and rotation as inputs. Since
-        // the rotation is directly from the gyro it should be a more accurate
-        // measurement of the change in angle than any calcuation we would make.
+        // the rotation is directly from the gyro it should be a more
+        // accurate measurement of the change in angle than any calcuation
+        // we would make.
         //
         // We don't want to integrate the error (the 'I' in PID) because
         // when we are moving we will correctly have a non-zero errorAngle
         // for an extended period of time.
-        motorSpeed += clip(Kbp*errorAngle - Kbd*rotation, maxMotorSpeed);
+        motorSpeed = clip(motorSpeed + Kbp*errorAngle - Kbd*rotation,
+                          maxMotorSpeed);
 
         // Positive motor speeds go forward.
         if ((cfAngle > -stopMotorAngle) && (cfAngle < stopMotorAngle)) {
-            setMotorSpeedM1(motorSpeed + direction);
-            setMotorSpeedM2(motorSpeed - direction);
+            setMotorSpeedM1(-motorSpeed + direction);
+            setMotorSpeedM2(-motorSpeed - direction);
             digitalWrite(motorEnable, LOW);
         } else {
             digitalWrite(motorEnable, HIGH);
@@ -216,6 +249,38 @@ void loop() {
     }
 }
 
+void rcUpdate() {
+    unsigned long now = micros();
+    unsigned long fbTime = now - lastForwardBackwardTime;
+    unsigned long lrTime = now - lastLeftRightTime;
+    if ((fbTime > rcTimeOut) || (lrTime > rcTimeOut)) {
+        lowPassLeftRight = 1500;
+        lowPassForwardBackward = 1500;
+        lastLeftRightValue = LOW;
+        lastForwardBackwardValue = LOW;
+    }
+    int current = digitalRead(rcLeftRight);
+    if (current != lastLeftRightValue) {
+        if (current == LOW) {
+            lowPassLeftRight =
+                rcLowPassConst*lowPassLeftRight + (1-rcLowPassConst)*lrTime;
+        }
+        lastLeftRightValue = current;
+        lastLeftRightTime = now;
+    }
+    current = digitalRead(rcForwardBackward);
+    if (current != lastForwardBackwardValue) {
+        if (current == LOW) {
+            lowPassForwardBackward =
+                rcLowPassConst*lowPassForwardBackward +
+                (1-rcLowPassConst)*fbTime;
+        }
+        lastForwardBackwardValue = current;
+        lastForwardBackwardTime = now;
+    }
+}
+
+
 // Return 'cfAngle' and 'rotation' in degrees.
 //   cfAngle  has a positive value when angled forward
 //   rotation has a positive value when pitching forward
@@ -224,7 +289,9 @@ void getCFAngleAndRotation(float *cfAngle, float *rotation) {
     // vertical and goes +/- when she tilts. Use calculated conversions to
     // get these values to G and radians/sec.
     float a = -mpu.getAccelerationX() * a2g;
+    rcUpdate();
     float r = mpu.getRotationY() * r2rs;
+    rcUpdate();
 
     // Update complementary filter in radians. Technically, we should use
     // asin() on the acceleration to get the angle, however for small angles
@@ -248,11 +315,11 @@ static bool nextSample() {
     // When using millis() I noticed an occasional start delay of 1 ms or,
     // more importantly, a 10% error.  By using micros() I measured a max
     // start delay of less than 100us or 1% error.
-    unsigned long now = micros();
+    now = micros();
     if (nextSampleTime < now) {
-        if ((now-nextSampleTime) > 40) {
-            tone(buzzer, 262, 100);
-        }
+//        if ((now-nextSampleTime) > 100) {
+//            tone(buzzer, 262, 5);
+//        }
         nextSampleTime += 1000000/updatesPerSec;
         return true;
     }
@@ -274,9 +341,7 @@ static float anglePID(float setpoint, float input) {
     angleITerm = clip(angleITerm + (Kai * error), maxAngle);
     float angleDTerm = Kad * (angleLastInput - input);
     angleLastInput = input;
-    float output = clip(anglePTerm + angleITerm + angleDTerm, maxAngle);
-    output = -output;  // This guy needs to be inverted.
-    return output;
+    return clip(anglePTerm + angleITerm + angleDTerm, maxAngle);
 }
 
 static int stepsToRotationsSec(int16_t steps) {
