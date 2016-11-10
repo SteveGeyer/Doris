@@ -487,6 +487,69 @@ module twoWheelBaseBottom() {
     }
 }
 
+module twoWheelBaseSkirt() {
+    skirtMajorDiameter = 210;
+    skirtMinorDiameter = 165;
+    wheelHoleOffset = 68;
+    wheelHoleWidth = 13;
+    wheelHoleLength = 95;
+
+    difference() {
+        union() {
+            scale([1, skirtMinorDiameter/skirtMajorDiameter, 1]) {
+                cylinder(d = skirtMajorDiameter, h = plateThickness, $fn=60);
+            }
+            twoWheelBaseBottom();
+        }
+        union() {
+            // Cut in wheel hole.
+            for (o = [wheelHoleOffset+wheelHoleWidth/2,
+                      -wheelHoleOffset-wheelHoleWidth/2]) {
+                translate([-wheelHoleWidth/2+o, -wheelHoleLength/2, -iota]) {
+                    cube([wheelHoleWidth, wheelHoleLength, plateThickness+2*iota]);
+                }
+            }
+
+            // Cut in a bunch of holes to make printing faster.
+            for (ox = [92, -92]) {
+                translate([ox, 0, -iota]) {
+                    scale([1, 3, 1]) {
+                        cylinder(d = 15, h = plateThickness+2*iota);
+                    }
+                }
+            }
+            for (ox = [48, -48]) {
+                for (oy = [46, -46]) {
+                    translate([ox, oy, -iota]) {
+                        scale([1, 2.5, 1]) {
+                            cylinder(d = 15, h = plateThickness+2*iota);
+                        }
+                    }
+                }
+            }
+            // for (oy = [60, -60]) {
+            //     translate([0, oy, -iota]) {
+            //         scale([2.5, 1, 1]) {
+            //             cylinder(d = 25, h = plateThickness+2*iota);
+            //         }
+            //     }
+            // }
+            for (oy = [30, -30]) {
+                translate([0, oy, -iota]) {
+                    scale([1.6, 1, 1]) {
+                        cylinder(d = 25, h = plateThickness+2*iota);
+                    }
+                }
+            }
+                translate([0, 0, -iota]) {
+                    cylinder(d = 25, h = plateThickness+2*iota);
+                }
+
+
+        }
+    }
+}
+
 module twoWheelMotorMount() {
     mountRadius = 42;
     extensionHeight = 0;
@@ -495,6 +558,7 @@ module twoWheelMotorMount() {
     holeDy = 17;
     screwTopDiameter = 6;
     screwTopHeight = screwLength - plateThickness + 2;
+    mountHeight = 10;
     module screwAdd() {
         for (dx = [holeDx, -holeDx]) {
             for (dy = [holeDy, -holeDy]) {
@@ -518,11 +582,11 @@ module twoWheelMotorMount() {
     difference() {
         union() {
             cylinder(r = mountRadius, h = plateThickness, $fn=60);
-            threeMountsAdd(plateThickness);
+            threeMountsAdd(mountHeight);
             screwAdd();
         }
         union() {
-            threeMountsDel(plateThickness);
+            threeMountsDel(mountHeight);
             translate([0, 0, -iota]) {
                 scale([1, 2, 1]) {
                     cylinder(d=interiorHoleDiameter,
